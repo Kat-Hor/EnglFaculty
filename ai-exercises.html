@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Exercises · English Hub</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bangers&family=Comic+Neue:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<style>
+  .mission{background:var(--yellow); border:3px solid var(--ink); border-radius:12px; padding:12px 16px; font-weight:700; margin-bottom:18px; font-size:19px}
+  .handin{background:var(--pink4); border:3px solid var(--ink); border-radius:12px; padding:10px 14px}
+  .tzlink{display:inline-block; margin-top:16px; font-family:"Bangers"; letter-spacing:1px; font-size:20px; text-decoration:none;
+    color:var(--yellow); background:var(--ink); border:3px solid var(--ink); border-radius:12px; padding:3px 14px; box-shadow:3px 3px 0 var(--pink)}
+  .controls{display:flex; justify-content:flex-end; gap:10px; margin:-8px 0 18px}
+  .controls button{cursor:pointer; font-family:"Bangers"; letter-spacing:1px; font-size:18px; background:var(--white); border:3px solid var(--ink); border-radius:10px; padding:2px 12px}
+</style>
+</head>
+<body>
+
+<nav class="topnav"><ul>
+  <li><a href="index.html">🏠 Home</a></li>
+  <li><a href="github-guide.html">🛠️ GitHub Guide</a></li>
+  <li><a href="ai-rules.html">🚦 AI Rules</a></li>
+  <li><a class="active" href="ai-exercises.html">🤖 AI Exercises</a></li>
+  <li><a href="teacher-zone.html">🍎 Teacher Zone</a></li>
+</ul></nav>
+
+<header class="pagehead">
+  <div class="wrap">
+    <h1>AI Exercises 🤖💬</h1>
+    <p class="lead">15 classroom ideas for working with AI — from Year 5 to the Abitur. Each card has a mission for the students, the steps, what to hand in and a prompt you can copy. Before you start: show the <a href="ai-rules.html"><b>AI traffic light</b></a>! 🚦</p>
+  </div>
+  <div class="pow">BEEP!</div>
+</header>
+
+<main class="wrap">
+  <section>
+    <div class="tabs" role="tablist" id="tabs"></div>
+    <div class="levelnote" id="note"></div>
+    <div class="controls"><button id="openAll">Open all</button><button id="closeAll">Close all</button></div>
+    <div id="list"></div>
+  </section>
+</main>
+
+<footer>
+  <div class="bang">Try it, adapt it, share it! 💗</div>
+  <p>Assessment tasks and rubrics for many of these exercises: see the <a href="teacher-zone.html" style="color:var(--yellow)">Teacher Zone</a>.</p>
+</footer>
+
+<script src="exercises-data.js"></script>
+<script>
+let current = "lower";
+function pick(k){ current=k; renderTabs(document.getElementById("tabs"), current, pick); render(); }
+
+function render(){
+  document.getElementById("note").innerHTML = LEVELS[current].note;
+  const list = document.getElementById("list"); list.innerHTML="";
+  EX[current].forEach((ex,i)=>{
+    const [lc,lt] = LIGHT[ex.light];
+    const card = document.createElement("article");
+    card.className = "ex" + (i===0?" open":"");
+    card.innerHTML = `
+      <div class="ex-head">
+        <div class="emo">${ex.emo}</div>
+        <div><h3>${ex.title}</h3>
+          <div class="chips">
+            <span class="chip">⏱ ${ex.time}</span><span class="chip">🎯 ${ex.skill}</span>
+            <span class="chip ${lc}">${lt}</span>
+            ${ex.lead==="teacher"?'<span class="chip">👩‍🏫 teacher-led</span>':''}
+            ${ex.rubric?'<span class="chip tz">📏 with rubric</span>':''}
+          </div></div>
+        <div class="toggle">+</div>
+      </div>
+      <div class="ex-body">
+        <div class="mission">🚀 Your mission: ${ex.mission}</div>
+        <div class="cols">
+          <div class="box">
+            <h4>What you do</h4>
+            <ol>${ex.steps.map(s=>`<li>${s}</li>`).join("")}</ol>
+            <h4>Hand in</h4>
+            <div class="handin">📥 ${ex.handin}</div>
+            ${ex.rubric?`<a class="tzlink" href="teacher-zone.html#${ex.id}">🍎 Rubric in the Teacher Zone →</a>`:''}
+          </div>
+          <div class="box">
+            <div class="prompt"><span class="lbl">${ex.who==="teacher"?"Prompt for the teacher 👩‍🏫":"Prompt for students 💬"}</span><button class="copy">Copy</button><span class="ptxt"></span></div>
+            <div class="tip"><b>Tip 💡</b> ${ex.tip}</div>
+          </div>
+        </div>
+      </div>`;
+    card.querySelector(".ptxt").textContent = ex.prompt;
+    card.querySelector(".ex-head").onclick = ()=>card.classList.toggle("open");
+    card.querySelector(".copy").onclick = e=>{ e.stopPropagation(); copyText(ex.prompt, e.currentTarget); };
+    list.appendChild(card);
+  });
+}
+document.getElementById("openAll").onclick = ()=>document.querySelectorAll(".ex").forEach(c=>c.classList.add("open"));
+document.getElementById("closeAll").onclick = ()=>document.querySelectorAll(".ex").forEach(c=>c.classList.remove("open"));
+pick(current);
+</script>
+</body>
+</html>

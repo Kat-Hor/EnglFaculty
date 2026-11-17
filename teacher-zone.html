@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Teacher Zone · English Hub</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bangers&family=Comic+Neue:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<style>
+  .principles{display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:22px}
+  .pr{background:var(--ink); color:var(--white); border:4px solid var(--ink); border-radius:16px; padding:18px 20px; box-shadow:6px 6px 0 var(--pink)}
+  .pr .e{font-size:38px; line-height:1}
+  .pr h3{font-size:25px; color:var(--yellow); margin:6px 0 4px}
+  .pr p{margin:0; font-size:17px}
+  .brief{background:var(--pink4); border:3px solid var(--ink); border-radius:12px; padding:12px 16px}
+  .brief p{margin:0 0 8px} .brief p:last-child{margin:0}
+  .ex.flash{animation:flash 1.2s 2}
+  @keyframes flash{50%{box-shadow:8px 8px 0 var(--yellow), 0 0 0 6px var(--pink)}}
+</style>
+</head>
+<body>
+
+<nav class="topnav"><ul>
+  <li><a href="index.html">🏠 Home</a></li>
+  <li><a href="github-guide.html">🛠️ GitHub Guide</a></li>
+  <li><a href="ai-rules.html">🚦 AI Rules</a></li>
+  <li><a href="ai-exercises.html">🤖 AI Exercises</a></li>
+  <li><a class="active" href="teacher-zone.html">🍎 Teacher Zone</a></li>
+</ul></nav>
+
+<header class="pagehead dark">
+  <div class="wrap">
+    <h1>Teacher Zone 🍎</h1>
+    <p class="lead"><b>Teachers only!</b> 🤫 Assessment ideas for AI tasks — each with a matching rubric out of <b>10 points</b>. Click the points to try out a rubric; the total is calculated automatically.</p>
+  </div>
+  <div class="pow">SHHH!</div>
+</header>
+
+<main class="wrap">
+
+  <section>
+    <h2 class="title">How to assess AI tasks 🧭</h2>
+    <div class="principles">
+      <div class="pr"><div class="e">🧠</div><h3>Assess the thinking</h3><p>Grade what students do <i>with</i> the AI: checking, improving, arguing, reflecting — never the AI's text itself.</p></div>
+      <div class="pr"><div class="e">🔁</div><h3>Process counts</h3><p>Ask for drafts, chat logs and the "AI note". Revision and reflection can carry points.</p></div>
+      <div class="pr"><div class="e">🔴</div><h3>RED for the product</h3><p>Practise with AI (GREEN/YELLOW), but let students write or perform the graded part on their own.</p></div>
+      <div class="pr"><div class="e">📏</div><h3>Transparent criteria</h3><p>Show students the rubric before they start. Adapt weighting to your course and the curriculum.</p></div>
+    </div>
+  </section>
+
+  <section>
+    <h2 class="title">Tasks &amp; Rubrics 📏</h2>
+    <div class="tabs" role="tablist" id="tabs"></div>
+    <div id="list"></div>
+  </section>
+
+</main>
+
+<footer>
+  <div class="bang">Happy grading! ☕💗</div>
+  <p>All rubrics add up to 10 points — adjust criteria and weighting to your own course.</p>
+</footer>
+
+<script src="exercises-data.js"></script>
+<script>
+let current = "lower";
+const state = {};
+
+function pick(k, openId){ current=k; renderTabs(document.getElementById("tabs"), current, k=>pick(k)); render(openId); }
+
+function render(openId){
+  const list = document.getElementById("list"); list.innerHTML="";
+  const items = EX[current].filter(e=>e.rubric);
+  items.forEach((ex,i)=>{
+    if(!state[ex.id]) state[ex.id] = {};
+    const [lc,lt] = LIGHT[ex.light];
+    const card = document.createElement("article");
+    card.id = ex.id;
+    card.className = "ex" + ((openId ? openId===ex.id : i===0) ? " open" : "");
+    card.innerHTML = `
+      <div class="ex-head">
+        <div class="emo">${ex.emo}</div>
+        <div><h3>${ex.title}</h3>
+          <div class="chips"><span class="chip">⏱ ${ex.time}</span><span class="chip">🎯 ${ex.skill}</span><span class="chip ${lc}">${lt}</span></div></div>
+        <div class="toggle">+</div>
+      </div>
+      <div class="ex-body">
+        <div class="cols">
+          <div class="box"><h4>The task in brief</h4>
+            <div class="brief"><p>🚀 ${ex.mission}</p><p>📥 <b>Hand in:</b> ${ex.handin}</p></div>
+          </div>
+          <div class="box"><h4>How to assess</h4>
+            <p>${ex.assess}</p>
+            <a class="tag" style="text-decoration:none; color:var(--ink)" href="ai-exercises.html">🤖 Full exercise &amp; prompt → AI Exercises</a>
+          </div>
+        </div>
+        <div class="rubric">
+          <div class="rubric-head"><h4>Assessment rubric</h4><div class="total"><span class="sum">0</span> / 10</div></div>
+          ${ex.rubric.map((r,ri)=>{
+            let b=""; for(let v=0; v<=r.max+1e-9; v+=r.step){ b+=`<button class="pt" data-r="${ri}" data-v="${v}">${fmt(v)}</button>`; }
+            return `<div class="row"><div class="crit">${r.c} <span style="color:var(--pink)">(${fmt(r.max)} P.)</span></div><div class="desc">${r.d}</div><div class="pts">${b}</div></div>`;
+          }).join("")}
+          <div class="rubric-foot"><span class="grade"></span><button class="reset">Reset</button></div>
+        </div>
+        <div class="tip"><b>Teacher tip 💡</b> ${ex.tip}</div>
+      </div>`;
+    card.querySelector(".ex-head").onclick = ()=>card.classList.toggle("open");
+    const update = ()=>{
+      const s = state[ex.id];
+      card.querySelectorAll(".pt").forEach(b=>b.classList.toggle("on", s[b.dataset.r]!==undefined && Number(b.dataset.v)===s[b.dataset.r]));
+      const n = Object.keys(s).length, sum = Object.values(s).reduce((a,b)=>a+b,0);
+      card.querySelector(".sum").textContent = fmt(sum);
+      card.querySelector(".grade").textContent = n < ex.rubric.length
+        ? `Criteria rated: ${n} of ${ex.rubric.length}` : `Total: ${fmt(sum)} of 10 points (${Math.round(sum*10)} %)`;
+    };
+    card.querySelectorAll(".pt").forEach(b=>b.onclick=()=>{ state[ex.id][b.dataset.r]=Number(b.dataset.v); update(); });
+    card.querySelector(".reset").onclick = ()=>{ state[ex.id]={}; update(); };
+    update();
+    list.appendChild(card);
+  });
+  if(openId){
+    const el = document.getElementById(openId);
+    if(el){ setTimeout(()=>{ el.scrollIntoView({behavior:"smooth", block:"start"}); el.classList.add("flash"); },100); }
+  }
+}
+
+// open the right level when coming from "AI Exercises" (teacher-zone.html#id)
+const hash = location.hash.slice(1);
+const lvl = Object.keys(EX).find(k=>EX[k].some(e=>e.id===hash && e.rubric));
+lvl ? pick(lvl, hash) : pick("lower");
+</script>
+</body>
+</html>
